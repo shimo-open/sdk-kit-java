@@ -2,17 +2,13 @@ package com.shimo.sdk.api;
 
 import com.shimo.sdk.ShimoClient;
 import com.shimo.sdk.common.SdkException;
-import com.shimo.sdk.dto.request.AddTableSheetRequest;
-import com.shimo.sdk.dto.request.AppendTableContentRequest;
-import com.shimo.sdk.dto.request.DeleteTableRowRequest;
-import com.shimo.sdk.dto.request.GetTableContentRequest;
-import com.shimo.sdk.dto.request.TableUploadAttachmentRequest;
-import com.shimo.sdk.dto.request.UpdateTableContentRequest;
+import com.shimo.sdk.dto.request.*;
 import com.shimo.sdk.dto.response.GetTableContentRes;
 import com.shimo.sdk.dto.response.TableUploadAttRes;
 import com.shimo.sdk.utils.HttpClient;
 import com.shimo.sdk.utils.JsonUtil;
 import okhttp3.Response;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 
@@ -36,10 +32,12 @@ public class TableApi {
     public GetTableContentRes getContent(GetTableContentRequest request) throws SdkException {
         String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/%s/sheets/values", request.getFileId());
 
-        HashMap<String, Object> body = new HashMap<>();
-        body.put("range", request.getRange());
+        HashMap<String, Object> params = new HashMap<>();
+        if (StringUtils.isNotEmpty(request.getRange())) {
+            params.put("range", request.getRange());
+        }
 
-        try (Response response = httpClient.get(url, body, null)) {
+        try (Response response = httpClient.get(url, params, null)) {
             handleResponse(response);
             return JsonUtil.fromJson(response.body().string(), GetTableContentRes.class);
         } catch (Exception e) {
@@ -68,13 +66,13 @@ public class TableApi {
      * 追加表格内容
      */
     public void appendContent(AppendTableContentRequest request) throws SdkException {
-        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/%s/sheets/values/append", request.getFileId());
+        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/%s/sheets/values", request.getFileId());
 
         HashMap<String, Object> body = new HashMap<>();
         body.put("range", request.getRange());
         body.put("resource", request.getResource());
 
-        try (Response response = httpClient.post(url, body, null)) {
+        try (Response response = httpClient.put(url, body, null)) {
             handleResponse(response);
         } catch (Exception e) {
             throw new SdkException(e);
@@ -85,13 +83,12 @@ public class TableApi {
      * 删除表格行
      */
     public void deleteRow(DeleteTableRowRequest request) throws SdkException {
-        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/%s/sheets/deleteRange", request.getFileId());
+        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/%s/sheets/%s/rows/%s",
+                request.getFileId(),
+                request.getSheetName(),
+                request.getIndex());
 
-        HashMap<String, Object> body = new HashMap<>();
-        body.put("range", request.getRange());
-        body.put("dimension", request.getDimension());
-
-        try (Response response = httpClient.post(url, body, null)) {
+        try (Response response = httpClient.delete(url, null, null)) {
             handleResponse(response);
         } catch (Exception e) {
             throw new SdkException(e);
@@ -102,7 +99,7 @@ public class TableApi {
      * 新增表格工作表
      */
     public void addSheet(AddTableSheetRequest request) throws SdkException {
-        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/%s/sheets/add", request.getFileId());
+        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/%s/sheets", request.getFileId());
 
         HashMap<String, Object> body = new HashMap<>();
         body.put("name", request.getName());

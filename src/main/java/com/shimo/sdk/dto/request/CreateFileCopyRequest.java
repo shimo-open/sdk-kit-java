@@ -13,12 +13,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class CreateFileCopyRequest extends BaseRequest {
-    
-    /**
-     * 文件类型
-     */
-    private String type;
-    
+
     /**
      * 目标文件 ID
      */

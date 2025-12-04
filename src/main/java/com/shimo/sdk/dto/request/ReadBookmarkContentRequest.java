@@ -5,6 +5,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
+
 /**
  * 读取书签内容请求
  */
@@ -17,6 +19,6 @@ public class ReadBookmarkContentRequest extends BaseRequest {
     /**
      * 书签名称
      */
-    private String bookmarkName;
+    private List<String> bookmarks;
 }
 

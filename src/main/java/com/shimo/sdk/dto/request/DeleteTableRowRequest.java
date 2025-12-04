@@ -13,15 +13,10 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class DeleteTableRowRequest extends BaseRequest {
-    
-    /**
-     * 表格范围
-     */
-    private String range;
-    
-    /**
-     * 维度: ROWS(行) 或 COLUMNS(列)
-     */
-    private String dimension;
+
+    private String sheetName;
+
+    private String index;
+
 }
 

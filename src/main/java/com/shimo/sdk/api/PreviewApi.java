@@ -9,8 +9,6 @@ import com.shimo.sdk.utils.HttpClient;
 import com.shimo.sdk.utils.JsonUtil;
 import okhttp3.Response;
 
-import java.util.HashMap;
-
 /**
  * 预览操作 API
  * 包含创建预览和访问预览等操作
@@ -29,9 +27,9 @@ public class PreviewApi {
      * 创建预览
      */
     public CreatePreviewRes create(CreatePreviewRequest request) throws SdkException {
-        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/%s/preview", request.getFileId());
+        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/cloud-files/%s/create", request.getFileId());
 
-        try (Response response = httpClient.post(url, new HashMap<>(), null)) {
+        try (Response response = httpClient.post(url, null, null)) {
             handleResponse(response);
             return JsonUtil.fromJson(response.body().string(), CreatePreviewRes.class);
         } catch (Exception e) {
@@ -43,10 +41,9 @@ public class PreviewApi {
      * 访问预览
      */
     public String access(AccessPreviewRequest request) throws SdkException {
-        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/%s/preview/%s", 
-            request.getFileId(), request.getPreviewId());
+        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/cloud-files/%s/page", request.getFileId());
 
-        try (Response response = httpClient.get(url, null, null)) {
+        try (Response response = httpClient.get(url, null)) {
             handleResponse(response);
             return response.body().string();
         } catch (Exception e) {

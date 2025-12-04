@@ -14,6 +14,7 @@ import okhttp3.Response;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 系统操作 API
@@ -47,7 +48,7 @@ public class SystemApi {
      * 更新应用回调地址
      */
     public void updateCallbackUrl(UpdateCallbackUrlRequest request) throws SdkException {
-        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/license/apps/%s/callback", request.getAppId());
+        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/license/apps/%s/endpoint-url", request.getAppId());
 
         HashMap<String, Object> body = new HashMap<>();
         body.put("url", request.getUrl());
@@ -63,12 +64,17 @@ public class SystemApi {
      * 获取用户列表和席位状态
      */
     public List<GetUserStatusRes> getUserStatus(GetUserStatusRequest request) throws SdkException {
-        String url = client.getConfig().getApiPrefix() + "/sdk/v2/api/license/users/status";
+        String url = client.getConfig().getApiPrefix() + "/sdk/v2/api/license/users";
 
-        HashMap<String, Object> body = new HashMap<>();
-        body.put("userIds", request.getUserIds());
+        Map<String, Object> params = new HashMap<>();
+        if (request.getSize() != null) {
+            params.put("size", request.getSize().toString());
+        }
+        if (request.getPage() != null) {
+            params.put("page", request.getPage().toString());
+        }
 
-        try (Response response = httpClient.post(url, body, null)) {
+        try (Response response = httpClient.get(url, params, null)) {
             handleResponse(response);
             return JsonUtil.fromJsonToList(response.body().string(), GetUserStatusRes.class);
         } catch (Exception e) {
@@ -83,7 +89,7 @@ public class SystemApi {
         String url = client.getConfig().getApiPrefix() + "/sdk/v2/api/license/users/activate";
 
         HashMap<String, Object> body = new HashMap<>();
-        body.put("userId", request.getUserId());
+        body.put("userIds", request.getUserIds());
 
         try (Response response = httpClient.post(url, body, null)) {
             handleResponse(response);
@@ -99,7 +105,7 @@ public class SystemApi {
         String url = client.getConfig().getApiPrefix() + "/sdk/v2/api/license/users/deactivate";
 
         HashMap<String, Object> body = new HashMap<>();
-        body.put("userId", request.getUserId());
+        body.put("userIds", request.getUserIds());
 
         try (Response response = httpClient.post(url, body, null)) {
             handleResponse(response);
@@ -112,11 +118,11 @@ public class SystemApi {
      * 批量设置用户席位
      */
     public void batchSetUserSeat(SetUserSeatRequest request) throws SdkException {
-        String url = client.getConfig().getApiPrefix() + "/sdk/v2/api/license/users/batch-set";
+        String url = client.getConfig().getApiPrefix() + "/sdk/v2/api/license/users/set-status";
 
         HashMap<String, Object> body = new HashMap<>();
-        body.put("activateUsers", request.getActivateUsers());
-        body.put("deactivateUsers", request.getDeactivateUsers());
+        body.put("userIds", request.getUserIds());
+        body.put("status", request.getStatus());
 
         try (Response response = httpClient.post(url, body, null)) {
             handleResponse(response);

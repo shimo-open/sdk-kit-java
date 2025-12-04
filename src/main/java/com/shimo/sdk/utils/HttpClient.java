@@ -1,9 +1,8 @@
 package com.shimo.sdk.utils;
 
 import com.shimo.sdk.common.Constants;
-import com.shimo.sdk.common.ShimoConfig;
 import com.shimo.sdk.common.SdkException;
-import com.shimo.sdk.utils.JsonUtil;
+import com.shimo.sdk.common.ShimoConfig;
 import okhttp3.*;
 
 import java.io.File;
@@ -74,21 +73,42 @@ public class HttpClient {
     /**
      * GET 请求
      */
-    public Response get(String url, Object body, HashMap<String, String> customHeaders) throws SdkException {
+    public Response get(String url, HashMap<String, String> customHeaders) throws SdkException {
         HashMap<String, String> headers = buildHeaders(customHeaders);
-        
-        RequestBody requestBody = null;
-        if (body != null) {
-            MediaType mediaType = MediaType.parse(Constants.JSON_MIME);
-            requestBody = RequestBody.create(mediaType, JsonUtil.toJson(body));
-        }
         
         Request request = new Request.Builder()
                 .url(url)
-                .method("GET", requestBody)
+                .get()
                 .headers(Headers.of(headers))
                 .build();
-        
+
+        return execute(request);
+    }
+
+    /**
+     * GET 请求
+     */
+    public Response get(String url, Map<String, Object> params, HashMap<String, String> customHeaders) throws SdkException {
+        HashMap<String, String> headers = buildHeaders(customHeaders);
+
+        StringBuilder sb = new StringBuilder(url);
+        if (params != null && !params.isEmpty()) {
+            sb.append("?");
+            for (Map.Entry<String, Object> entry : params.entrySet()) {
+                sb.append(entry.getKey())
+                        .append("=")
+                        .append(entry.getValue())
+                        .append("&");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+        }
+
+        Request request = new Request.Builder()
+                .url(sb.toString())
+                .get()
+                .headers(Headers.of(headers))
+                .build();
+
         return execute(request);
     }
 
@@ -107,7 +127,39 @@ public class HttpClient {
                 .method("POST", requestBody)
                 .headers(Headers.of(headers))
                 .build();
-        
+
+        return execute(request);
+    }
+
+    /**
+     * POST 请求
+     */
+    public Response post(String url, Object body, HashMap<String, String> params, HashMap<String, String> customHeaders) throws SdkException {
+        HashMap<String, String> headers = buildHeaders(customHeaders);
+        headers.put(Constants.CONTENT_TYPE_HEADER, Constants.JSON_MIME);
+
+        MediaType mediaType = MediaType.parse(Constants.JSON_MIME);
+        RequestBody requestBody = RequestBody.create(mediaType, JsonUtil.toJson(body));
+
+        StringBuilder sb = new StringBuilder(url);
+
+        if (params != null && !params.isEmpty()) {
+            sb.append("?");
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                sb.append(entry.getKey())
+                        .append("=")
+                        .append(entry.getValue())
+                        .append("&");
+            }
+            sb.deleteCharAt(sb.length() - 1); // 删除最后的 &
+        }
+
+        Request request = new Request.Builder()
+                .url(sb.toString())
+                .method("POST", requestBody)
+                .headers(Headers.of(headers))
+                .build();
+
         return execute(request);
     }
 

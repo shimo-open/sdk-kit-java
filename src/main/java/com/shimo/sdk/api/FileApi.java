@@ -3,16 +3,8 @@ package com.shimo.sdk.api;
 import com.shimo.sdk.ShimoClient;
 import com.shimo.sdk.common.Constants;
 import com.shimo.sdk.common.SdkException;
-import com.shimo.sdk.dto.request.CreateFileCopyRequest;
-import com.shimo.sdk.dto.request.CreateFileRequest;
-import com.shimo.sdk.dto.request.ExportFileRequest;
-import com.shimo.sdk.dto.request.GetProgressRequest;
-import com.shimo.sdk.dto.request.ImportFileRequest;
-import com.shimo.sdk.dto.response.ExportFileRes;
-import com.shimo.sdk.dto.response.ExportTableSheetsRes;
-import com.shimo.sdk.dto.response.GetExportProgressRes;
-import com.shimo.sdk.dto.response.GetImportProgressRes;
-import com.shimo.sdk.dto.response.ImportFileRes;
+import com.shimo.sdk.dto.request.*;
+import com.shimo.sdk.dto.response.*;
 import com.shimo.sdk.utils.HttpClient;
 import com.shimo.sdk.utils.JsonUtil;
 import com.shimo.sdk.utils.StrUtil;
@@ -67,11 +59,10 @@ public class FileApi {
      * 创建协同文档副本
      */
     public void createCopy(CreateFileCopyRequest request) throws SdkException {
-        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/%s/copy", request.getFileId());
+        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/collab-files/%s/copy", request.getFileId());
 
         HashMap<String, Object> body = new HashMap<>();
-        body.put("type", request.getType());
-        body.put("toFileId", request.getToFileId());
+        body.put("fileId", request.getToFileId());
 
         try (Response response = httpClient.post(url, body, null)) {
             handleResponse(response);
@@ -94,7 +85,7 @@ public class FileApi {
     }
 
     /**
-     * 导入文件
+     * 导入文件 (旧)
      */
     public ImportFileRes importFile(ImportFileRequest request) throws SdkException {
         String url = client.getConfig().getApiPrefix() + "/sdk/v2/api/files/v1/import";
@@ -121,12 +112,57 @@ public class FileApi {
     }
 
     /**
-     * 获取导入进度
+     * 导入文件 (新)
+     */
+    public ImportFileRes importFileNew(ImportFileRequest request) throws SdkException {
+        String url = client.getConfig().getApiPrefix() + "/sdk/v2/api/files/v2/import";
+
+        HashMap<String, Object> formData = new HashMap<>();
+        formData.put("type", request.getType());
+        formData.put("fileId", request.getFileId());
+        if (request.getFile() != null) {
+            formData.put("file", request.getFile());
+        }
+        if (StringUtils.isNotEmpty(request.getFileUrl())) {
+            formData.put("fileUrl", request.getFileUrl());
+        }
+        if (StringUtils.isNotEmpty(request.getFileName())) {
+            formData.put("fileName", request.getFileName());
+        }
+        if (StringUtils.isNotEmpty(request.getImportFontType())) {
+            formData.put("importFontType", request.getImportFontType());
+        }
+
+        try (Response response = httpClient.postMultipart(url, formData, null)) {
+            handleResponse(response);
+            return JsonUtil.fromJson(response.body().string(), ImportFileRes.class);
+        } catch (Exception e) {
+            throw new SdkException(e);
+        }
+
+    }
+
+    /**
+     * 获取导入进度(旧)
      */
     public GetImportProgressRes getImportProgress(GetProgressRequest request) throws SdkException {
-        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/%s/import/progress", request.getTaskId());
+        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/v1/import/progress?taskId=%s", request.getTaskId());
 
-        try (Response response = httpClient.get(url, null, null)) {
+        try (Response response = httpClient.post(url, null, null)) {
+            handleResponse(response);
+            return JsonUtil.fromJson(response.body().string(), GetImportProgressRes.class);
+        } catch (Exception e) {
+            throw new SdkException(e);
+        }
+    }
+
+    /**
+     * 获取导入进度(新)
+     */
+    public GetImportProgressRes getImportProgressNew(GetProgressRequest request) throws SdkException {
+        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/v2/import/progress");
+
+        try (Response response = httpClient.post(url, request, null)) {
             handleResponse(response);
             return JsonUtil.fromJson(response.body().string(), GetImportProgressRes.class);
         } catch (Exception e) {
@@ -138,7 +174,7 @@ public class FileApi {
      * 导出文件
      */
     public ExportFileRes exportFile(ExportFileRequest request) throws SdkException {
-        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/%s/export", request.getFileId());
+        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/v1/export/%s", request.getFileId());
 
         HashMap<String, Object> body = new HashMap<>();
         body.put("type", request.getType());
@@ -158,9 +194,9 @@ public class FileApi {
      * 获取导出进度
      */
     public GetExportProgressRes getExportProgress(GetProgressRequest request) throws SdkException {
-        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/%s/export/progress", request.getTaskId());
+        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/v1/export/progress");
 
-        try (Response response = httpClient.get(url, null, null)) {
+        try (Response response = httpClient.post(url, request, null)) {
             handleResponse(response);
             return JsonUtil.fromJson(response.body().string(), GetExportProgressRes.class);
         } catch (Exception e) {
@@ -169,12 +205,12 @@ public class FileApi {
     }
 
     /**
-     * 导出应用表格为 Excel
+     * 导出应用表格为 Excel(旧)
      */
     public ExportTableSheetsRes exportTableSheets(String fileId) throws SdkException {
-        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/shimo-files/%s/export", fileId);
+        String url = String.format(client.getConfig().getApiPrefix() + "/sdk/v2/api/files/export/table-sheets/%s", fileId);
 
-        try (Response response = httpClient.get(url, null, null)) {
+        try (Response response = httpClient.post(url, null, null)) {
             handleResponse(response);
             return JsonUtil.fromJson(response.body().string(), ExportTableSheetsRes.class);
         } catch (Exception e) {

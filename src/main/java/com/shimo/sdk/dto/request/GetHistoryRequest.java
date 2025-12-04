@@ -17,11 +17,16 @@ public class GetHistoryRequest extends BaseRequest {
     /**
      * 页码
      */
-    private Integer page;
+    private Integer count;
     
     /**
      * 每页数量
      */
     private Integer pageSize;
+
+    /**
+     * 操作历史
+     */
+    private Integer historyType;
 }
 

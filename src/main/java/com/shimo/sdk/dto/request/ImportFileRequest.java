@@ -35,5 +35,10 @@ public class ImportFileRequest extends BaseRequest {
      * 需要导入的文件名称(有参数 file,可以不用传)
      */
     private String fileName;
+
+    /**
+     * 导入文件时,指定导入的文件ID
+     */
+    private String importFontType;
 }
 

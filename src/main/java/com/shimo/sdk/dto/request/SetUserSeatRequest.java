@@ -11,20 +11,15 @@ import java.util.List;
 @Data
 @Builder
 public class SetUserSeatRequest {
-    
+
     /**
-     * 单个用户 ID(用于激活/取消单个用户席位)
+     * 需修改席位状态的用户 ID 列表
      */
-    private String userId;
-    
+    private List<String> userIds;
+
     /**
-     * 要激活席位的用户 ID 列表(用于批量设置)
+     * 1激活，0 禁用，-1 未启用
      */
-    private List<String> activateUsers;
-    
-    /**
-     * 要取消席位的用户 ID 列表(用于批量设置)
-     */
-    private List<String> deactivateUsers;
+    private Integer status;
 }
 

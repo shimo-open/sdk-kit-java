@@ -1,9 +1,12 @@
 package com.shimo.sdk.dto.request;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+
+import java.util.List;
 
 /**
  * 更新表格内容请求
@@ -22,6 +25,15 @@ public class UpdateTableContentRequest extends BaseRequest {
     /**
      * 要更新的数据内容
      */
-    private Object resource;
+    private Resource resource;
+
+    @Data
+    @Builder
+    public static class Resource {
+        /**
+         * 表格内容
+         */
+        private List<List<String>> values;
+    }
 }
 
