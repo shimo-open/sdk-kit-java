@@ -17,9 +17,9 @@
 
 ```xml
 <dependency>
-    <groupId>com.shimo.sdksdk</groupId>
-    <artifactId>sdk-sdk-java</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <groupId>io.github.shimo-open</groupId>
+    <artifactId>sdk-kit-java</artifactId>
+    <version>1.0.1</version>
 </dependency>
 ```
 
